@@ -230,7 +230,14 @@ let collapsed=JSON.parse(localStorage.getItem('obra_collapsed')||'{}');
 const dbRef=ref(db,'v2');
 onValue(dbRef,snap=>{
   const d=snap.val();
-  if(!d)return;
+  if(!d){
+  state.meta={title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'};
+  state.sections={};
+  state.items={};
+  render();
+  setSyncStatus('ok','🟡 Banco vazio (inicial)');
+  return;
+}
   state.meta=d.meta||{title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'};
   state.sections=d.sections||{};
   state.items=d.items||{};
