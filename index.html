@@ -227,42 +227,37 @@ if(RO){document.getElementById('roBanner').classList.add('show');document.getEle
 let state={meta:{},sections:{},items:{}};
 let activeTab='all',showPending=false,editCtx=null,secCtx=null,selColor=COLORS[0],secEditMode=false;
 let collapsed=JSON.parse(localStorage.getItem('obra_collapsed')||'{}');
-const dbRef=ref(db,'v2');
+// ── Mapa de seções fixas (compatível com estrutura 'checklist' existente)
+const SEC_MAP={
+  elec:{id:'elec',name:'⚡ Elétrica',color:'#f5c542',order:0},
+  drain:{id:'drain',name:'🚿 Esgoto',color:'#b57bff',order:1},
+  hydr:{id:'hydr',name:'💧 Hidráulica',color:'#38d9f5',order:2}
+};
+
+const dbRef=ref(db,'checklist');
 onValue(dbRef,snap=>{
   const d=snap.val();
+  // Construir state compatível com o novo formato de renderização
+  // usando os dados reais do Firebase (path: checklist/elec|drain|hydr)
+  state.meta={title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'};
+  // Tentar carregar meta customizado se existir
+  const metaSnap=d&&d._meta;
+  if(metaSnap){state.meta=metaSnap;}
+
+  // Montar sections e items a partir da estrutura checklist
+  state.sections={};
+  state.items={};
+  Object.entries(SEC_MAP).forEach(([secId,sec])=>{
+    state.sections[secId]={name:sec.name,color:sec.color,order:sec.order};
+    state.items[secId]=d&&d[secId]?d[secId]:{};
+  });
+
+  // Se banco vazio, popular com dados iniciais
   if(!d){
-    // Dados não encontrados em v2 — verificar se existem no caminho antigo (checklist)
-    const oldRef=ref(db,'checklist');
-    onValue(oldRef,oldSnap=>{
-      const old=oldSnap.val();
-      if(old){
-        // Migrar dados antigos para v2
-        const newData={
-          meta:{title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'},
-          sections:{
-            sec_elec:{name:'⚡ Elétrica',color:'#f5c542',order:0},
-            sec_drain:{name:'🚿 Esgoto',color:'#b57bff',order:1},
-            sec_hydr:{name:'💧 Hidráulica',color:'#38d9f5',order:2}
-          },
-          items:{sec_elec:{},sec_drain:{},sec_hydr:{}}
-        };
-        // Copiar itens antigos para as seções corretas
-        ['elec','drain','hydr'].forEach(sec=>{
-          const secKey='sec_'+sec;
-          const oldSec=old[sec]||{};
-          Object.entries(oldSec).forEach(([iid,item],idx)=>{
-            newData.items[secKey][iid]={
-              text:item.text||'',
-              checked:item.checked||false,
-              order:item.order||idx,
-              note:item.note||'',
-              price:item.price||0
-            };
-          });
-        });
-        set(dbRef,newData);
-      } else {
-        // Banco completamente vazio — carregar dados iniciais do SEED
-        const SEED={
-          meta:{title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'},
- 
+    const seed={
+      elec:{
+        i0:{text:'1 rolo — Fio 2,5mm VERMELHO 100m',checked:false,order:0,note:'',price:0},
+        i1:{text:'1 rolo — Fio 2,5mm AZUL 100m',checked:false,order:1,note:'',price:0},
+        i2:{text:'1 rolo — Fio 1,5mm BRANCO 100m',checked:false,order:2,note:'',price:0},
+        i3:{text:'1 rolo — Fio VERMELHO 10mm 50m',checked:false,order:3,note:'',price:0},
+        i4:{
