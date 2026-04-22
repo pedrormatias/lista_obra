@@ -6,387 +6,263 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Obra">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#0a0c12">
 <title>Lista Obra</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
-  :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
-    --border: #2e3347; --text: #e8eaf0; --muted: #6b7280;
-    --electric: #f7c948; --electric-dim: rgba(247,201,72,0.12);
-    --water: #38bdf8; --water-dim: rgba(56,189,248,0.12);
-    --drain: #a78bfa; --drain-dim: rgba(167,139,250,0.12);
-    --green: #4ade80; --green-dim: rgba(74,222,128,0.1);
-    --red: #f87171; --radius: 12px; --radius-sm: 8px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; overflow: hidden; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
-
-  /* SYNC STATUS */
-  .sync-bar {
-    background: #0a1628; border-bottom: 1px solid #1e3a5f;
-    padding: 4px 16px; font-size: 11px; font-family: 'DM Mono', monospace;
-    color: var(--muted); display: flex; align-items: center; gap: 6px;
-    flex-shrink: 0;
-  }
-  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .sync-dot.ok { background: var(--green); }
-  .sync-dot.err { background: var(--red); }
-  .sync-dot.loading { background: var(--electric); animation: blink 1s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: calc(14px + var(--safe-top)) 16px 12px; flex-shrink: 0;
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon { width: 34px; height: 34px; background: var(--electric); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
-  .logo h1 { font-size: 16px; font-weight: 700; }
-  .logo p  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .reset-btn { padding: 6px 14px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 99px; color: var(--red); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; flex-shrink: 0; }
-  .progress-wrap { display: flex; align-items: center; gap: 10px; }
-  .progress-bar-bg { flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--electric), var(--green)); border-radius: 99px; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
-  .progress-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--electric); min-width: 48px; text-align: right; }
-
-  .tabs { display: flex; gap: 6px; padding: 10px 16px 0; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; background: var(--bg); }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { flex-shrink: 0; padding: 6px 13px; border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted); transition: all 0.18s; display: flex; align-items: center; gap: 5px; }
-  .tab.active-elec  { background: var(--electric-dim); border-color: var(--electric); color: var(--electric); }
-  .tab.active-hydr  { background: var(--water-dim);    border-color: var(--water);    color: var(--water); }
-  .tab.active-drain { background: var(--drain-dim);    border-color: var(--drain);    color: var(--drain); }
-  .tab.active-all   { background: var(--green-dim);    border-color: var(--green);    color: var(--green); }
-  .tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-  .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px calc(16px + var(--safe-bottom)); }
-
-  .section { margin-bottom: 22px; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 0 2px; }
-  .section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 6px; }
-  .section-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-family: 'DM Mono', monospace; font-weight: 500; }
-  .sec-elec  .section-title { color: var(--electric); }
-  .sec-elec  .section-badge { background: var(--electric-dim); color: var(--electric); }
-  .sec-hydr  .section-title { color: var(--water); }
-  .sec-hydr  .section-badge { background: var(--water-dim); color: var(--water); }
-  .sec-drain .section-title { color: var(--drain); }
-  .sec-drain .section-badge { background: var(--drain-dim); color: var(--drain); }
-
-  .item-list { display: flex; flex-direction: column; gap: 3px; }
-  .item { display: flex; align-items: center; gap: 11px; padding: 12px 13px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; user-select: none; }
-  .item.checked { opacity: 0.5; }
-  .item.checked .item-text { text-decoration: line-through; color: var(--muted); }
-  .item-check { width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
-  .sec-elec  .item.checked .item-check { background: var(--electric); border-color: var(--electric); color: #000; }
-  .sec-hydr  .item.checked .item-check { background: var(--water);    border-color: var(--water);    color: #000; }
-  .sec-drain .item.checked .item-check { background: var(--drain);    border-color: var(--drain);    color: #fff; }
-  .item-text { flex: 1; font-size: 14px; line-height: 1.4; }
-  .item-actions { display: flex; gap: 3px; flex-shrink: 0; }
-  .btn-icon { width: 30px; height: 30px; border-radius: 7px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface2); color: var(--muted); }
-  .btn-icon.del { color: var(--red); background: rgba(248,113,113,0.08); }
-
-  .add-row { display: flex; gap: 7px; margin-top: 7px; }
-  .add-input { flex: 1; background: var(--surface2); border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
-  .add-input::placeholder { color: var(--muted); }
-  .add-input:focus { border-style: solid; }
-  .sec-elec  .add-input:focus { border-color: var(--electric); }
-  .sec-hydr  .add-input:focus { border-color: var(--water); }
-  .sec-drain .add-input:focus { border-color: var(--drain); }
-  .btn-add { padding: 10px 16px; border-radius: var(--radius-sm); border: none; font-size: 20px; cursor: pointer; font-weight: 700; }
-  .sec-elec  .btn-add { background: var(--electric-dim); color: var(--electric); }
-  .sec-hydr  .btn-add { background: var(--water-dim);    color: var(--water); }
-  .sec-drain .btn-add { background: var(--drain-dim);    color: var(--drain); }
-
-  .done-banner { display: none; text-align: center; padding: 16px; font-size: 26px; animation: pulse 1s infinite alternate; }
-  @keyframes pulse { from {opacity:.7} to {opacity:1} }
-
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: calc(16px + var(--safe-bottom)); }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; width: 100%; max-width: 480px; animation: slideUp 0.22s cubic-bezier(.4,0,.2,1); }
-  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
-  .modal input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 12px; color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 14px; }
-  .modal input:focus { border-color: var(--electric); }
-  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
-  .btn-cancel { padding: 9px 18px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--muted); font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .btn-save { padding: 9px 22px; background: var(--electric); border: none; border-radius: var(--radius-sm); color: #000; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-
-  .toast { position: fixed; bottom: calc(24px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 600; z-index: 300; transition: transform 0.28s cubic-bezier(.4,0,.2,1); pointer-events: none; white-space: nowrap; }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap');
+:root{
+  --bg:#0a0c12;--surface:#12151f;--surface2:#1a1e2e;--surface3:#222738;
+  --border:#2a2f45;--border2:#363d58;--text:#e2e5f0;--muted:#5a6080;--muted2:#8090b0;
+  --gold:#f5c542;--gold-dim:rgba(245,197,66,.1);--gold-glow:rgba(245,197,66,.25);
+  --green:#3dffa0;--red:#ff5f7a;--red-dim:rgba(255,95,122,.1);
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  --fd:'Syne',sans-serif;--fm:'JetBrains Mono',monospace;--fb:'Nunito',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+.ro-banner{background:linear-gradient(135deg,#0f1f14,#0a1a0f);border-bottom:1px solid #3dffa033;padding:calc(4px + var(--safe-top)) 16px 6px;font-size:11px;font-family:var(--fm);color:#3dffa0;display:none;align-items:center;gap:8px;flex-shrink:0}
+.ro-banner.show{display:flex}
+.sync-bar{background:#080a10;border-bottom:1px solid var(--border);padding:calc(4px + var(--safe-top)) 16px 4px;font-size:10px;font-family:var(--fm);color:var(--muted);display:flex;align-items:center;gap:6px;flex-shrink:0}
+.sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.sync-dot.err{background:var(--red)}
+.sync-dot.loading{background:var(--gold);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px 10px;flex-shrink:0}
+.header-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.logo-icon{width:36px;height:36px;background:var(--gold);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 16px var(--gold-glow)}
+.title-wrap{flex:1;min-width:0}
+.app-title{font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-title:hover .ehi{opacity:1}
+.ehi{font-size:11px;opacity:0;transition:opacity .2s;color:var(--gold)}
+.app-subtitle{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:1px}
+.header-actions{display:flex;gap:5px;flex-shrink:0}
+.hbtn{width:32px;height:32px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.hbtn:hover{border-color:var(--border2);color:var(--text);background:var(--surface3)}
+.hbtn.active{background:var(--gold-dim);color:var(--gold);border-color:var(--gold)}
+.hbtn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.progress-wrap{display:flex;align-items:center;gap:8px}
+.progress-bar-bg{flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.progress-label{font-family:var(--fm);font-size:11px;color:var(--gold);min-width:44px;text-align:right}
+.cost-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:10px;font-family:var(--fm);color:var(--muted);flex-wrap:wrap;gap:4px}
+.cv{font-weight:600}
+.cv.tot{color:var(--text)}.cv.don{color:var(--green)}.cv.lft{color:var(--gold)}
+.tabs-wrap{background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;padding:0 12px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--fb);border-bottom:2px solid transparent;transition:all .18s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-count{font-size:10px;font-family:var(--fm);opacity:.7}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px calc(14px + var(--safe-bottom))}
+.section{margin-bottom:14px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);cursor:pointer;user-select:none}
+.sec-hdr:hover{background:var(--surface2)}
+.sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sec-name{font-family:var(--fd);font-size:13px;font-weight:700;flex:1}
+.sec-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-family:var(--fm)}
+.sec-cost{font-size:10px;font-family:var(--fm);color:var(--muted)}
+.sec-chev{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sec-chev.collapsed{transform:rotate(-90deg)}
+.sec-mbtn{width:24px;height:24px;border-radius:var(--radius-xs);border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-mbtn:hover{background:var(--surface3);color:var(--text)}
+.sec-body{background:var(--bg);padding:8px 10px 10px}
+.sec-body.collapsed{display:none}
+.sort-bar{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.sort-lbl{font-size:10px;color:var(--muted);font-family:var(--fm)}
+.sort-btn{padding:3px 9px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-family:var(--fm);cursor:pointer;transition:all .15s}
+.sort-btn:hover{border-color:var(--gold);color:var(--gold)}
+.item-list{display:flex;flex-direction:column;gap:3px}
+.item{display:flex;align-items:flex-start;gap:8px;padding:10px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .15s;user-select:none}
+.item:hover{border-color:var(--border2)}
+.item.checked{opacity:.45}
+.item.checked .item-text{text-decoration:line-through;color:var(--muted)}
+.item.dragging{opacity:.35;border-style:dashed}
+.item.drag-over{border-color:var(--gold);background:var(--gold-dim)}
+.drag-handle{cursor:grab;color:var(--muted);font-size:16px;flex-shrink:0;padding:1px 2px 0;touch-action:none}
+.drag-handle:active{cursor:grabbing}
+.item-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;margin-top:1px;cursor:pointer}
+.item-body{flex:1;min-width:0;cursor:pointer}
+.item-text{font-size:13px;line-height:1.4}
+.item-note{font-size:11px;color:var(--muted2);margin-top:2px;font-style:italic}
+.item-price{font-size:11px;font-family:var(--fm);margin-top:2px}
+.item-actions{display:flex;gap:2px;flex-shrink:0}
+.ibtn{width:28px;height:28px;border-radius:var(--radius-xs);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;background:transparent;color:var(--muted);transition:all .15s}
+.ibtn:hover{background:var(--surface3);color:var(--text)}
+.ibtn.del:hover{background:var(--red-dim);color:var(--red)}
+.add-row{display:flex;gap:6px;margin-top:8px}
+.add-input{flex:1;background:var(--surface2);border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:9px 11px;color:var(--text);font-size:13px;font-family:var(--fb);outline:none;transition:border-color .2s}
+.add-input::placeholder{color:var(--muted)}
+.add-input:focus{border-style:solid;border-color:var(--gold)}
+.btn-add{padding:9px 14px;border-radius:var(--radius-sm);border:none;font-size:18px;cursor:pointer;font-weight:700;background:var(--gold-dim);color:var(--gold)}
+.btn-add:hover{background:var(--gold-glow)}
+.new-sec-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border2);background:transparent;color:var(--muted);font-size:13px;font-family:var(--fb);cursor:pointer;width:100%;transition:all .2s;margin-top:8px}
+.new-sec-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.done-banner{display:none;text-align:center;padding:20px;font-size:28px;animation:pulse 1s infinite alternate}
+@keyframes pulse{from{opacity:.7}to{opacity:1}}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--safe-bottom));backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;width:100%;max-width:500px;animation:slideUp .22s cubic-bezier(.4,0,.2,1)}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h3{font-family:var(--fd);font-size:15px;font-weight:700;margin-bottom:14px}
+.modal label{font-size:11px;color:var(--muted2);font-family:var(--fm);margin-bottom:4px;display:block;margin-top:10px}
+.modal input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-size:14px;font-family:var(--fb);outline:none;margin-bottom:4px}
+.modal input:focus{border-color:var(--gold)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn-cancel{padding:9px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:14px;cursor:pointer;font-family:var(--fb)}
+.btn-ok{padding:9px 22px;background:var(--gold);border:none;border-radius:var(--radius-sm);color:#000;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--fb)}
+.share-box{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px;margin-top:8px}
+.share-box h4{font-size:11px;font-family:var(--fm);color:var(--muted2);margin-bottom:8px}
+.share-url{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px 10px;color:var(--text);font-size:11px;font-family:var(--fm);margin-bottom:8px;word-break:break-all;line-height:1.4}
+.share-copy-btn{padding:6px 14px;border-radius:var(--radius-xs);border:1px solid var(--border2);background:var(--surface3);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--fb)}
+.share-copy-btn:hover{border-color:var(--gold);color:var(--gold)}
+.share-note{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:10px;line-height:1.5}
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
+.color-opt.selected{border-color:white;transform:scale(1.15)}
+.ctx-menu{position:fixed;z-index:300;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px;min-width:168px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
+.ctx-menu.open{display:block}
+.ctx-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--radius-xs);font-size:13px;cursor:pointer;transition:background .12s}
+.ctx-item:hover{background:var(--surface2)}
+.ctx-item.danger{color:var(--red)}
+.ctx-item.danger:hover{background:var(--red-dim)}
+.toast{position:fixed;bottom:calc(24px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;padding:9px 18px;border-radius:99px;font-size:12px;font-weight:700;z-index:400;transition:transform .28s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap;font-family:var(--fm)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media print{
+  .ro-banner,.sync-bar,.header-actions,.tabs-wrap,.item-actions,.add-row,.new-sec-btn,.toast,.modal-bg,.ctx-menu,.drag-handle,.sort-bar,.sec-mbtn{display:none!important}
+  body{overflow:auto;background:white;color:black}
+  .scroll-area{overflow:visible}
+  .section{border:1px solid #ccc}
+  .sec-body.collapsed{display:block!important}
+  .item{border:1px solid #ddd;break-inside:avoid}
+}
 </style>
 </head>
 <body>
-
-<div class="sync-bar">
-  <div class="sync-dot loading" id="syncDot"></div>
-  <span id="syncLabel">Conectando...</span>
-</div>
-
+<div class="ro-banner" id="roBanner">👁️ Modo visualização — você pode acompanhar mas não editar esta lista</div>
+<div class="sync-bar"><div class="sync-dot loading" id="syncDot"></div><span id="syncLabel">Conectando...</span></div>
 <header>
   <div class="header-top">
-    <div class="logo">
-      <div class="logo-icon">🏗️</div>
-      <div>
-        <h1>Lista de Materiais</h1>
-        <p>Obra · Airbnb 25m²</p>
-      </div>
+    <div class="logo-icon">🏗️</div>
+    <div class="title-wrap">
+      <div class="app-title" id="appTitleEl" onclick="openTitleEdit()"><span id="titleText">Lista de Materiais</span><span class="ehi" id="editHint">✏️</span></div>
+      <div class="app-subtitle" id="appSubtitle">Obra · Airbnb 25m²</div>
     </div>
-    <button class="reset-btn" onclick="resetAll()">↺ Limpar</button>
+    <div class="header-actions" id="headerActions">
+      <button class="hbtn" id="filterBtn" title="Só pendentes" onclick="togglePending(this)">🔍</button>
+      <button class="hbtn" title="Compartilhar" onclick="openShareModal()">🔗</button>
+      <button class="hbtn" title="Imprimir" onclick="window.print()">🖨️</button>
+      <button class="hbtn danger" title="Limpar marcações" onclick="resetAll()">↺</button>
+    </div>
   </div>
-  <div class="progress-wrap">
-    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
-    <span class="progress-label" id="progressLabel">0 / 0</span>
+  <div class="progress-wrap"><div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div><span class="progress-label" id="progressLabel">0/0</span></div>
+  <div class="cost-bar">
+    <span>💰 <span class="cv tot" id="cTot">R$ 0,00</span></span>
+    <span>✅ <span class="cv don" id="cDon">R$ 0,00</span></span>
+    <span>⏳ <span class="cv lft" id="cLft">R$ 0,00</span></span>
   </div>
 </header>
-
-<div class="tabs">
-  <button class="tab active-all" onclick="filterSection('all',this)">⬡ Todos</button>
-  <button class="tab" onclick="filterSection('elec',this)"><span class="tab-dot" style="background:var(--electric)"></span>Elétrica</button>
-  <button class="tab" onclick="filterSection('drain',this)"><span class="tab-dot" style="background:var(--drain)"></span>Esgoto</button>
-  <button class="tab" onclick="filterSection('hydr',this)"><span class="tab-dot" style="background:var(--water)"></span>Hidráulica</button>
-</div>
-
+<div class="tabs-wrap"><div class="tabs" id="tabsEl"></div></div>
 <div class="scroll-area">
   <div class="done-banner" id="doneBanner">🎉 Tudo comprado! Boa obra! 🎉</div>
-  <div class="section sec-elec" id="sec-elec">
-    <div class="section-header">
-      <div class="section-title">⚡ Elétrica</div>
-      <span class="section-badge" id="badge-elec">0/0</span>
-    </div>
-    <div class="item-list" id="list-elec"></div>
-    <div class="add-row">
-      <input class="add-input" id="input-elec" placeholder="Adicionar item…" onkeydown="if(event.key==='Enter')addItem('elec')">
-      <button class="btn-add" onclick="addItem('elec')">+</button>
-    </div>
-  </div>
-  <div class="section sec-drain" id="sec-drain">
-    <div class="section-header">
-      <div class="section-title">🚿 Esgoto</div>
-      <span class="section-badge" id="badge-drain">0/0</span>
-    </div>
-    <div class="item-list" id="list-drain"></div>
-    <div class="add-row">
-      <input class="add-input" id="input-drain" placeholder="Adicionar item…" onkeydown="if(event.key==='Enter')addItem('drain')">
-      <button class="btn-add" onclick="addItem('drain')">+</button>
-    </div>
-  </div>
-  <div class="section sec-hydr" id="sec-hydr">
-    <div class="section-header">
-      <div class="section-title">💧 Hidráulica</div>
-      <span class="section-badge" id="badge-hydr">0/0</span>
-    </div>
-    <div class="item-list" id="list-hydr"></div>
-    <div class="add-row">
-      <input class="add-input" id="input-hydr" placeholder="Adicionar item…" onkeydown="if(event.key==='Enter')addItem('hydr')">
-      <button class="btn-add" onclick="addItem('hydr')">+</button>
-    </div>
+  <div id="secsEl"></div>
+  <button class="new-sec-btn" id="newSecBtn" onclick="openNewSection()">＋ Nova categoria</button>
+</div>
+
+<div class="modal-bg" id="itemModal" onclick="if(event.target===this)closeItemModal()">
+  <div class="modal"><h3>✏️ Editar item</h3>
+    <label>Nome do item</label><input type="text" id="iText" placeholder="Ex: 10m Fio azul 2,5mm">
+    <label>Nota / Loja</label><input type="text" id="iNote" placeholder="Ex: Leroy Merlin, prateleira 3">
+    <label>Preço (R$)</label><input type="number" id="iPrice" placeholder="0.00" min="0" step="0.01">
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeItemModal()">Cancelar</button><button class="btn-ok" onclick="saveItemModal()">Salvar</button></div>
   </div>
 </div>
 
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModalDirect()">
-  <div class="modal">
-    <h3>✏️ Editar item</h3>
-    <input type="text" id="modalInput" placeholder="Nome do item">
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModalDirect()">Cancelar</button>
-      <button class="btn-save" onclick="saveEdit()">Salvar</button>
-    </div>
+<div class="modal-bg" id="titleModal" onclick="if(event.target===this)closeTitleModal()">
+  <div class="modal"><h3>✏️ Editar título</h3>
+    <label>Título</label><input type="text" id="tMain" placeholder="Lista de Materiais">
+    <label>Subtítulo</label><input type="text" id="tSub" placeholder="Obra · Airbnb 25m²">
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeTitleModal()">Cancelar</button><button class="btn-ok" onclick="saveTitleModal()">Salvar</button></div>
   </div>
+</div>
+
+<div class="modal-bg" id="secModal" onclick="if(event.target===this)closeSecModal()">
+  <div class="modal"><h3 id="secModalTitle">＋ Nova categoria</h3>
+    <label>Nome</label><input type="text" id="secName" placeholder="Ex: Decoração">
+    <label>Cor</label><div class="color-picker" id="colorPicker"></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeSecModal()">Cancelar</button><button class="btn-ok" onclick="saveSecModal()">Salvar</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+  <div class="modal"><h3>🔗 Compartilhar lista</h3>
+    <div class="share-box"><h4>✏️ LINK DE EDIÇÃO — pode marcar, adicionar e editar</h4><div class="share-url" id="editUrl"></div><button class="share-copy-btn" onclick="copyUrl('editUrl')">📋 Copiar</button></div>
+    <div class="share-box" style="margin-top:10px"><h4>👁️ LINK SOMENTE LEITURA — só visualiza</h4><div class="share-url" id="viewUrl"></div><button class="share-copy-btn" onclick="copyUrl('viewUrl')">📋 Copiar</button></div>
+    <p class="share-note">💡 Mande o link de leitura para quem só precisa acompanhar o progresso sem editar.</p>
+    <div class="modal-btns"><button class="btn-ok" onclick="closeShareModal()">Fechar</button></div>
+  </div>
+</div>
+
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxRename()">✏️ Renomear / cor</div>
+  <div class="ctx-item" onclick="ctxSortAZ()">🔤 Ordenar A→Z</div>
+  <div class="ctx-item" onclick="ctxCollapseAll()">📦 Recolher todas</div>
+  <div class="ctx-item" onclick="ctxExpandAll()">📂 Expandir todas</div>
+  <div class="ctx-item danger" onclick="ctxDelete()">🗑️ Apagar seção</div>
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCjAADZZfa2QGvBI9oiYBbaUKvV5Rhfh5Q",
-  authDomain: "listaobra-db878.firebaseapp.com",
-  projectId: "listaobra-db878",
-  storageBucket: "listaobra-db878.firebasestorage.app",
-  messagingSenderId: "867473809051",
-  appId: "1:867473809051:web:8d199fea9961b72d32f03e",
-  databaseURL: "https://listaobra-db878-default-rtdb.firebaseio.com"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-
-const INITIAL = {
-  elec: [
-    "1 rolo — Fio 2,5mm VERMELHO 100m","1 rolo — Fio 2,5mm AZUL 100m",
-    "1 rolo — Fio 1,5mm BRANCO 100m","1 rolo — Fio VERMELHO 10mm 50m",
-    "15m — Fio AZUL 10mm","10m — Fio AZUL 6mm","10m — Fio VERMELHO 6mm",
-    "20m — Fio AZUL 4mm","20m — Fio VERMELHO 4mm",
-    "1 Quadro 16/18 disjuntores Tigre c/ barramento",
-    "2 Pente barramento trifásico","4 Conector genérico fio 10mm",
-    "1 Disjuntor trifásico 40A","1 Disjuntor mono 32A","1 Disjuntor mono 10A",
-    "4 Disjuntores mono 20A","4 Disjuntores mono 16A",
-    '1 rolo — Conduite 1/2"','15m — Conduite 3/4"','15m — Conduite 1"',
-    "2 Fita isolante 3M grande","12 Caixinhas 4×2","7 Caixinhas 4×4",
-  ],
-  drain: [
-    "1 vara — Tubo 40mm 3m","1 Ralinho 10 — saída 40mm","1 Y de 40mm",
-    "1 Joelho anel e cola 40mm","2 Joelho 40mm","2 Joelho 40mm 45 graus",
-    "1 Bolsa ligação p/ vaso sanitário","1 Pote cola adesiva Aquaterme",
-  ],
-  hydr: [
-    '2 Base registro 1/2" Deca gaveta','1 Base registro 1/2" Deca pressão',
-    '5 Adaptador 1/2" × 20mm','1 Luva azul 1/2" × 20mm','6 Joelho azul 1/2" × 20mm',
-    '1 Joelho azul 3/4" × 20mm',"5 T de 20mm","3 Luva 20mm","12 Joelho 20mm",
-    "1 Fita teflon grande","1 Veda junta pequeno","8 varas — Tubo 20mm 3m",
-    "2 Redução 25×20mm","1m — Tubo 25mm","2 Joelho 25mm 45 graus",
-    '2 Luva 1½" × 50mm marrom',"1 T de 50mm × 25mm","1m — Tubo 50mm",
-    "1 Luva de correr 50mm",'1 Tampão cap roscável 1½"','1 Tarraxa de 1½"',
-  ],
-};
-
-// Sync status
-function setSyncStatus(status, msg) {
-  const dot = document.getElementById('syncDot');
-  const lbl = document.getElementById('syncLabel');
-  dot.className = `sync-dot ${status}`;
-  lbl.textContent = msg;
-}
-
-// State in memory (mirror of Firebase)
-let state = { elec: [], drain: [], hydr: [] };
-let dbRef = ref(db, 'checklist');
-
-// Listen realtime
-onValue(dbRef, (snapshot) => {
-  const data = snapshot.val();
-  if (!data) {
-    // First time — seed with initial data
-    const seed = {};
-    for (const [sec, items] of Object.entries(INITIAL)) {
-      seed[sec] = {};
-      items.forEach((text, i) => {
-        seed[sec][`item_${i}`] = { text, checked: false, order: i };
-      });
-    }
-    set(dbRef, seed);
-    return;
-  }
-  // Convert firebase object to array
-  for (const sec of ['elec','drain','hydr']) {
-    const secData = data[sec] || {};
-    state[sec] = Object.entries(secData)
-      .map(([id, val]) => ({ id, text: val.text, checked: val.checked || false, order: val.order || 0 }))
-      .sort((a,b) => a.order - b.order);
-  }
-  render();
-  setSyncStatus('ok', '🟢 Sincronizado em tempo real');
-}, (error) => {
-  setSyncStatus('err', '🔴 Sem conexão');
-});
-
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function render() {
-  for (const sec of ['elec','drain','hydr']) {
-    const list = document.getElementById(`list-${sec}`);
-    list.innerHTML = '';
-    state[sec].forEach(item => {
-      const d = document.createElement('div');
-      d.className = `item${item.checked?' checked':''}`;
-      d.innerHTML = `
-        <div class="item-check">${item.checked?'✓':''}</div>
-        <div class="item-text">${esc(item.text)}</div>
-        <div class="item-actions">
-          <button class="btn-icon" onclick="openEdit('${sec}','${item.id}');event.stopPropagation()">✏️</button>
-          <button class="btn-icon del" onclick="removeItem('${sec}','${item.id}');event.stopPropagation()">🗑</button>
-        </div>`;
-      d.onclick = () => toggleItem(sec, item.id, item.checked);
-      list.appendChild(d);
-    });
-    const done = state[sec].filter(i=>i.checked).length;
-    document.getElementById(`badge-${sec}`).textContent = `${done}/${state[sec].length}`;
-  }
-  const total = Object.values(state).flat().length;
-  const done  = Object.values(state).flat().filter(i=>i.checked).length;
-  const pct   = total ? done/total*100 : 0;
-  document.getElementById('progressFill').style.width = pct+'%';
-  document.getElementById('progressLabel').textContent = `${done} / ${total}`;
-  document.getElementById('doneBanner').style.display = (total>0&&done===total)?'block':'none';
-}
-
-window.toggleItem = function(sec, id, current) {
-  update(ref(db, `checklist/${sec}/${id}`), { checked: !current });
-  if (!current) showToast('✓ Marcado!');
-};
-
-window.addItem = function(sec) {
-  const inp = document.getElementById(`input-${sec}`);
-  const text = inp.value.trim();
-  if (!text) return;
-  const order = state[sec].length;
-  push(ref(db, `checklist/${sec}`), { text, checked: false, order });
-  inp.value = '';
-};
-
-window.removeItem = function(sec, id) {
-  remove(ref(db, `checklist/${sec}/${id}`));
-};
-
-let editCtx = null;
-window.openEdit = function(sec, id) {
-  const item = state[sec].find(i=>i.id===id);
-  if (!item) return;
-  editCtx = {sec, id};
-  document.getElementById('modalInput').value = item.text;
-  document.getElementById('modalBg').classList.add('open');
-  setTimeout(()=>document.getElementById('modalInput').focus(), 120);
-};
-window.closeModalDirect = function() {
-  document.getElementById('modalBg').classList.remove('open');
-  editCtx = null;
-};
-window.saveEdit = function() {
-  if (!editCtx) return;
-  const text = document.getElementById('modalInput').value.trim();
-  if (!text) return;
-  update(ref(db, `checklist/${editCtx.sec}/${editCtx.id}`), { text });
-  closeModalDirect();
-};
-document.getElementById('modalInput').addEventListener('keydown', e=>{
-  if (e.key==='Enter') saveEdit();
-  if (e.key==='Escape') closeModalDirect();
-});
-
-window.filterSection = function(target, btn) {
-  document.querySelectorAll('.tab').forEach(t=>t.className='tab');
-  const map = {elec:'active-elec',hydr:'active-hydr',drain:'active-drain',all:'active-all'};
-  btn.className = `tab ${map[target]}`;
-  ['elec','drain','hydr'].forEach(sec=>{
-    document.getElementById(`sec-${sec}`).style.display=(target==='all'||target===sec)?'':'none';
-  });
-};
-
-let toastTimer;
-window.showToast = function(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
-};
-
-window.resetAll = function() {
-  if (!confirm('Limpar todas as marcações?')) return;
-  const updates = {};
-  for (const sec of ['elec','drain','hydr'])
-    state[sec].forEach(item => { updates[`checklist/${sec}/${item.id}/checked`] = false; });
-  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js")
-    .then(({update: fbUpdate}) => fbUpdate(ref(db, '/'), updates));
-  showToast('↺ Marcações limpas');
-};
-</script>
-</body>
-</html>
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,onValue,set,update,remove,push}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const app=initializeApp({apiKey:"AIzaSyCjAADZZfa2QGvBI9oiYBbaUKvV5Rhfh5Q",authDomain:"listaobra-db878.firebaseapp.com",projectId:"listaobra-db878",storageBucket:"listaobra-db878.firebasestorage.app",messagingSenderId:"867473809051",appId:"1:867473809051:web:8d199fea9961b72d32f03e",databaseURL:"https://listaobra-db878-default-rtdb.firebaseio.com"});
+const db=getDatabase(app);
+const COLORS=['#f5c542','#38d9f5','#b57bff','#3dffa0','#ff5f7a','#ff9f43','#ff6eb4','#00d4aa','#5c9eff','#a8e063'];
+const params=new URLSearchParams(window.location.search);
+const RO=params.get('view')==='1';
+if(RO){document.getElementById('roBanner').classList.add('show');document.getElementById('editHint').style.display='none';document.getElementById('appTitleEl').style.cursor='default';document.getElementById('appTitleEl').onclick=null;document.getElementById('headerActions').innerHTML='<button class="hbtn" title="Imprimir" onclick="window.print()">🖨️</button>';document.getElementById('newSecBtn').style.display='none';}
+let state={meta:{},sections:{},items:{}};
+let activeTab='all',showPending=false,editCtx=null,secCtx=null,selColor=COLORS[0],secEditMode=false;
+let collapsed=JSON.parse(localStorage.getItem('obra_collapsed')||'{}');
+const dbRef=ref(db,'v2');
+onValue(dbRef,snap=>{
+  const d=snap.val();
+  if(!d){
+    // Dados não encontrados em v2 — verificar se existem no caminho antigo (checklist)
+    const oldRef=ref(db,'checklist');
+    onValue(oldRef,oldSnap=>{
+      const old=oldSnap.val();
+      if(old){
+        // Migrar dados antigos para v2
+        const newData={
+          meta:{title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'},
+          sections:{
+            sec_elec:{name:'⚡ Elétrica',color:'#f5c542',order:0},
+            sec_drain:{name:'🚿 Esgoto',color:'#b57bff',order:1},
+            sec_hydr:{name:'💧 Hidráulica',color:'#38d9f5',order:2}
+          },
+          items:{sec_elec:{},sec_drain:{},sec_hydr:{}}
+        };
+        // Copiar itens antigos para as seções corretas
+        ['elec','drain','hydr'].forEach(sec=>{
+          const secKey='sec_'+sec;
+          const oldSec=old[sec]||{};
+          Object.entries(oldSec).forEach(([iid,item],idx)=>{
+            newData.items[secKey][iid]={
+              text:item.text||'',
+              checked:item.checked||false,
+              order:item.order||idx,
+              note:item.note||'',
+              price:item.price||0
+            };
+          });
+        });
+        set(dbRef,newData);
+      } else {
+        // Banco completamente vazio — carregar dados iniciais do SEED
+        const SEED={
+          meta:{title:'Lista de Materiais',subtitle:'Obra · Airbnb 25m²'},
+ 
